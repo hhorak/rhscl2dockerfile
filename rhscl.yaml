@@ -53,10 +53,13 @@ templates:
     Dockerfile.RHEL6.template: Dockerfile
     enable.sh: enable{{collection}}.sh
     README.template: README.md
+    cont-entry.sh: cont-entry
+
   rhel7:
     Dockerfile.RHEL7.template: Dockerfile
     enable.sh: enable{{collection}}.sh
     README.template: README.md
+    cont-entry.sh: cont-entry
 
 # For each container to define, define packages parameter to yum
 # install plus list of ports to expose.  The SCL collection name must
@@ -65,6 +68,17 @@ containers:
   mariadb55:
     install: mariadb55
     expose: [3306]
+    add:
+      - [mysql-common/mysqld.sh, mysqld.sh, /usr/local/libexec/cont-entry.d/]
+      - [mysql-common/mysqld-cont.cnf, mysqld-cont.cnf, /opt/rh/mariadb55/root/etc/my.cnf.d/]
+      - [mysql-common/init-base.sh, init-base.sh, /usr/local/libexec/cont-mysqld-init.d/]
+      - [mysql-common/cont-setup.sh.tpl, cont-setup.sh, /usr/local/libexec/]
+    run:
+      - /usr/local/libexec/cont-setup.sh
+    volume: ["/var/lib/mysql"]
+    user: mysql
+    entrypoint: ["cont-entry"]
+    cmd: ["mysqld"]
   mysql55:
     install: mysql55
     expose: [3306]
